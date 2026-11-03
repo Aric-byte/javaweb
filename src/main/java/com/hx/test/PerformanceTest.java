@@ -20,9 +20,25 @@ import java.sql.ResultSet;
  */
 public class PerformanceTest {
     
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/exam_system?useSSL=false&serverTimezone=Asia/Shanghai";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "aric2006";
+    private static final String DB_URL;
+    private static final String DB_USER;
+    private static final String DB_PASSWORD;
+
+    static {
+        // 与应用共用 db.properties，避免在代码中硬编码密码
+        java.util.Properties props = new java.util.Properties();
+        try (java.io.InputStream in = PerformanceTest.class.getClassLoader().getResourceAsStream("db.properties")) {
+            if (in == null) {
+                throw new IllegalStateException("未找到 db.properties，请从 db.properties.example 复制并配置");
+            }
+            props.load(in);
+        } catch (java.io.IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+        DB_URL = props.getProperty("jdbc.url");
+        DB_USER = props.getProperty("jdbc.username");
+        DB_PASSWORD = props.getProperty("jdbc.password");
+    }
     private static final String TEST_SQL = "SELECT * FROM Users WHERE userId = ?";
     private static final int TEST_COUNT = 100;
     
